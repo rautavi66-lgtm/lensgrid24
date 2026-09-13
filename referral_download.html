@@ -5,56 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Join LensGrid24</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            text-align: center;
-            padding: 50px 20px;
-            background-color: #f8f9fa;
-            color: #1a1a1a;
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+            text-align: center; 
+            padding: 50px 20px; 
+            background-color: #f8f9fa; 
+            color: #1a1a1a; 
             margin: 0;
         }
-        .card {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            max-width: 420px;
-            margin: auto;
+        .card { 
+            background: white; 
+            padding: 40px 30px; 
+            border-radius: 24px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            max-width: 420px; 
+            margin: auto; 
         }
-        .logo-text {
-            font-weight: 800;
-            font-size: 32px;
-            letter-spacing: -1px;
-            margin-bottom: 20px;
-            color: #1a1a1a;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-        p {
-            color: #666;
-            line-height: 1.6;
-            font-size: 16px;
-            margin-bottom: 24px;
-        }
-        .btn {
-            display: block;
-            background-color: #1a1a1a;
-            color: #ffffff !important;
-            padding: 18px 30px;
-            border-radius: 14px;
-            text-decoration: none;
-            font-weight: 700;
+        .logo-text { font-weight: 800; font-size: 32px; letter-spacing: -1px; margin-bottom: 20px; color: #1a1a1a; }
+        h1 { font-size: 24px; margin-bottom: 12px; font-weight: 700; }
+        p { color: #666; line-height: 1.6; font-size: 16px; margin-bottom: 24px; }
+        .btn { 
+            display: block; 
+            background-color: #1a1a1a; 
+            color: #ffffff !important; 
+            padding: 18px 30px; 
+            border-radius: 14px; 
+            text-decoration: none; 
+            font-weight: 700; 
             font-size: 18px;
             transition: all 0.2s;
             border: none;
             cursor: pointer;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         .referral-container {
             background: #f1f3f5;
@@ -63,25 +44,24 @@
             margin: 25px 0;
             border: 2px dashed #dee2e6;
         }
-        .label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #868e96;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .code {
-            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-            font-size: 28px;
-            font-weight: 800;
+        .code { 
+            font-family: monospace; 
+            font-size: 28px; 
+            font-weight: 800; 
             color: #1a1a1a;
             letter-spacing: 3px;
         }
-        .instruction {
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
             font-size: 14px;
-            color: #adb5bd;
-            margin-top: 30px;
+            display: none;
         }
     </style>
 </head>
@@ -90,33 +70,54 @@
         <div class="logo-text">LensGrid24</div>
         <h1>You're Invited!</h1>
         <p>Join the professional network of photographers and videographers.</p>
-
+        
         <div class="referral-container" id="referralBox">
-            <span class="label">Your Referral Code</span>
+            <div style="font-size: 12px; font-weight: 700; color: #868e96; margin-bottom: 8px;">REFERRAL CODE</div>
             <div class="code" id="codeDisplay">------</div>
+            <div style="font-size: 11px; color: #28a745; margin-top: 5px; font-weight: bold;">✓ Auto-copied to clipboard</div>
         </div>
 
-        <!-- Google Drive Folder Link -->
         <a href="https://drive.google.com/drive/folders/1DVviE8qkaStHWka9yvamCj13cKR7jTT6?usp=sharing" class="btn">
             Download App (APK)
         </a>
-
-        <div class="instruction">
-            1. Install the APK from the folder<br>
-            2. Enter the code during Sign Up
-        </div>
+        
+        <p style="font-size: 13px; color: #adb5bd; margin-top: 30px;">
+            1. Install the APK<br>
+            2. Code will be auto-filled during Sign Up
+        </p>
     </div>
+
+    <div id="toast" class="toast">Code copied!</div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
-
+        
         if (code) {
             document.getElementById('codeDisplay').innerText = code;
-            // Try to auto-open the app if already installed
+
+            // 1. AUTO-COPY MAGIC
+            const fallbackCopy = (text) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {}
+                document.body.removeChild(textArea);
+            };
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).catch(() => fallbackCopy(code));
+            } else {
+                fallbackCopy(code);
+            }
+
+            // 2. AUTO-OPEN APP (If already installed)
             setTimeout(() => {
                 window.location = "io.supabase.lencegrid24://referral/" + code;
-            }, 1000);
+            }, 1500);
         } else {
             document.getElementById('referralBox').style.display = 'none';
         }
